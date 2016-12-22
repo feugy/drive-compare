@@ -1,0 +1,14 @@
+{
+  "name": "drive-compare",
+  "version": "1.0.0",
+  "description": "Simple folder tree comparison utility",
+  "main": "compare.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Feugy <damien.feugas@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "drive-compare": "./cli.js"
+  }
+}
