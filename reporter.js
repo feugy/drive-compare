@@ -1,6 +1,6 @@
-const {relative} = require('path')
+import {relative} from 'node:path'
 
-module.exports = (folderA, folderB, results) => {
+export default (folderA, folderB, results) => {
   if (results.onlyA) {
     console.log(`\nonly existing in ${folderA}:`)
     results.onlyA.forEach(item => {

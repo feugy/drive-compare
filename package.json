@@ -2,7 +2,8 @@
   "name": "drive-compare",
   "version": "1.0.0",
   "description": "Simple folder tree comparison utility",
-  "main": "compare.js",
+  "main": "cli.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

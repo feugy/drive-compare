@@ -1,7 +1,8 @@
-const {promisify} = require('util')
-const readdir = promisify(require('fs').readdir)
-const {basename, extname, join, normalize, resolve, sep} = require('path')
-const exec = promisify(require('child_process').exec)
+import {readdir} from 'node:fs/promises'
+import {extname, join, normalize, resolve, sep} from 'node:path'
+import {promisify} from 'node:util'
+import process from 'node:child_process'
+const exec = promisify(process.exec)
 
 const extract = (folder, tree) =>
   Object.keys(tree).map(name => ({
@@ -28,6 +29,25 @@ const parse7z = (folder, {stdout}) => {
   return extract(folder, tree)
 }
 
+const parseZip = (folder, {stdout}) => {
+  const lines = stdout.split('\n')
+  const tree = {}
+  for (const line of lines.slice(2, -2)) {
+    console.log(line)
+    if (/^ +\d+ /.test(line)) {
+      const path = normalize(line.split(' ').at(-1).replace(/\r/g, ''))
+      let current = tree
+      for (const folder of path.split(sep)) {
+        if (!(folder in current)) {
+          current[folder] = {}
+        }
+        current = current[folder]
+      }
+    }
+  }
+  return extract(folder, tree)
+}
+
 const getContent = async ({path: folder, content}) => {
   if (content) {
     // folder was already parsed
@@ -37,6 +57,10 @@ const getContent = async ({path: folder, content}) => {
     // parse all zip entries
     const content = await exec(`7z l ${folder}`, {maxBuffer: 1024*1024*100})
     return parse7z(folder, content)
+  } else if (extname(folder) === '.zip') {
+    // parse all zip entries
+    const content = await exec(`unzip -l ${folder}`, {maxBuffer: 1024*1024*100})
+    return parseZip(folder, content)
   }
   try {
     return (await readdir(folder)).map(item => ({
@@ -67,5 +91,5 @@ const compare = async (folderA, folderB, results) => {
   return results
 }
 
-module.exports = async (folderA, folderB) =>
+export default async (folderA, folderB) =>
   compare({path: resolve(folderA)}, {path: resolve(folderB)}, {onlyA: [], onlyB: []})
