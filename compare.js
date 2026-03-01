@@ -34,17 +34,15 @@ const parse7z = (folder, {stdout}) => {
 const parseZip = (folder, {stdout}) => {
   const lines = stdout.split('\n')
   const tree = {}
-  for (const line of lines.slice(2, -2)) {
-    if (/^ +\d+ /.test(line)) {
-      const path = normalize(line.split(' ').at(-1).replace(/\r/g, ''))
-      let current = tree
-      for (const folder of path.split(sep)) {
-        if (!(folder in current)) {
-          current[folder] = {}
-        }
-        current = current[folder]
+  for (const line of lines) {  
+    const path = normalize(line.replace(/\r/g, '')).replace(new RegExp(`${sep}$`), '')
+    let current = tree
+    for (const folder of path.split(sep)) {
+      if (!(folder in current)) {
+        current[folder] = {}
       }
-    }
+      current = current[folder]
+    } 
   }
   return extract(folder, tree)
 }
@@ -107,7 +105,7 @@ const getContent = async ({path: folder, content}) => {
     return parse7z(folder, content)
   } else if (extname(folder) === '.zip') {
     // parse all zip entries
-    const content = await exec(`unzip -l "${folder}"`, {maxBuffer})
+    const content = await exec(`unzip -Z1 "${folder}"`, {maxBuffer})
     return parseZip(folder, content)
   }
   try {
