@@ -33,7 +33,6 @@ const parseZip = (folder, {stdout}) => {
   const lines = stdout.split('\n')
   const tree = {}
   for (const line of lines.slice(2, -2)) {
-    console.log(line)
     if (/^ +\d+ /.test(line)) {
       const path = normalize(line.split(' ').at(-1).replace(/\r/g, ''))
       let current = tree
@@ -55,11 +54,11 @@ const getContent = async ({path: folder, content}) => {
   }
   if (extname(folder) === '.7z') {
     // parse all zip entries
-    const content = await exec(`7z l ${folder}`, {maxBuffer: 1024*1024*100})
+    const content = await exec(`7z l "${folder}"`, {maxBuffer: 1024*1024*100})
     return parse7z(folder, content)
   } else if (extname(folder) === '.zip') {
     // parse all zip entries
-    const content = await exec(`unzip -l ${folder}`, {maxBuffer: 1024*1024*100})
+    const content = await exec(`unzip -l "${folder}"`, {maxBuffer: 1024*1024*100})
     return parseZip(folder, content)
   }
   try {
@@ -91,5 +90,5 @@ const compare = async (folderA, folderB, results) => {
   return results
 }
 
-export default async (folderA, folderB) =>
+export default async (folderA, folderB) => 
   compare({path: resolve(folderA)}, {path: resolve(folderB)}, {onlyA: [], onlyB: []})
